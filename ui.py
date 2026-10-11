@@ -51,14 +51,21 @@ class StreamlitUI:
                     key="selected_interface"
                 )
 
+            self.ss.bpf_filter = st.text_input(
+                "BPF Filter",
+                value=self.ss.bpf_filter,
+                disabled=running,
+                placeholder="e.g., tcp port 80"
+            )
+
             # Start / Stop buttons
             col1, col2 = st.columns(2, gap="small")
 
             with col1:
-                if st.button("Start", disabled=running or selected_iface is None):
+                if st.button("Start", use_container_width=True, disabled=running or selected_iface is None):
 
                     try:
-                        self.controller.start_capture(selected_iface)
+                        self.controller.start_capture(selected_iface, self.ss.bpf_filter)
                         st.rerun()
                     except Exception as e:
                         st.error(f"Failed to start capture: {e}")
@@ -115,14 +122,29 @@ class StreamlitUI:
             {"id": p["id"], **p["summary"]}
             for p in packets
         ]
-        
+
+        if not rows:
+            st.info("No packets captured yet.")
+            return
+
+        search_query = st.text_input(
+            "Search packets",
+            placeholder="Search by source, destination, protocol, etc."
+        )
+
+        if search_query:
+            rows = [
+                row for row in rows
+                if search_query.lower() in str(row).lower()
+            ]
+            
         event = st.dataframe(
             rows[::-1],
             width="stretch",
             selection_mode="single-row",
             on_select="rerun",
             hide_index=True
-            )
+        )
 
         if event.selection.rows:
             selected_index = event.selection.rows[0]

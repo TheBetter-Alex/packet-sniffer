@@ -40,8 +40,8 @@ class PacketController:
     def get_packet(self, packet_id):
         return self.storage.get_packet(packet_id)
 
-    def start_capture(self, iface):
-        self.sniffer.start(iface)
+    def start_capture(self, iface, bpf_filter=None):
+        self.sniffer.start(iface, bpf_filter)
 
     def stop_capture(self):
         self.sniffer.stop()

@@ -35,12 +35,13 @@ class PacketSniffer:
 
         return pps
 
-    def start(self, iface):
+    def start(self, iface, bpf_filter=None):
         if self.is_running():
             return
 
         self.sniffer = AsyncSniffer(
             iface=iface,
+            filter=bpf_filter,
             prn=self.handle_packet,
             store=False
         )
